@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titanium Cloud - سحابة تيتانيوم</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h1 { color: #333; margin-bottom: 5px; }
+        .subtitle { color: #777; font-size: 14px; margin-bottom: 25px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-google { background: #4285F4; color: white; }
+        .btn-dark { background: #333; color: white; }
+        .btn-outline { background: transparent; border: 1px solid #333; color: #333; }
+        .btn-danger { background: #d32f2f; color: white; }
+        #secret-section, #upload-section { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Titanium Apps</h1>
+    <p class="subtitle">More of Titanium - Cloud Service</p>
+
+    <div id="login-section">
+        <button class="btn-google" onclick="loginGoogle()">الدخول عبر Google</button>
+        <div style="margin: 15px 0; color: #aaa;">أو</div>
+        <input type="email" id="email" placeholder="البريد الإلكتروني">
+        <input type="password" id="pass" placeholder="كلمة المرور">
+        <button class="btn-dark" onclick="loginEmail()">دخول Titanium ID</button>
+        <button class="btn-outline" onclick="signupEmail()">إنشاء حساب جديد</button>
+    </div>
+
+    <div id="secret-section">
+        <h3 style="color: #d32f2f;">نظام الحماية</h3>
+        <p>أدخل كود الوصول لتفعيل السحابة:</p>
+        <input type="password" id="secretKey" placeholder="كود 19952009" style="text-align: center; font-size: 18px;">
+        <button class="btn-danger" onclick="verifySecret()">تحقق الآن</button>
+    </div>
+
+    <div id="upload-section">
+        <h3 style="color: #2e7d32;">سحابة تيتانيوم مفعلة ✅</h3>
+        <input type="file" id="filePicker" style="display: none;">
+        <button class="btn-dark" style="background: #2e7d32;" onclick="document.getElementById('filePicker').click()">رفع ملف جديد</button>
+        <p style="font-size: 12px; color: #666; margin-top: 15px;">المساحة المستخدمة: 0GB / 2GB</p>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDZxZp8iUyuzMdioBUHh9qjMxe-_C484oU",
+        authDomain: "titanium-project-b6ad3.firebaseapp.com",
+        projectId: "titanium-project-b6ad3",
+        storageBucket: "titanium-project-b6ad3.firebasestorage.app",
+        messagingSenderId: "222679477160",
+        appId: "1:222679477160:web:87cc56d7bd638a8bbb8b9d"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('secret-section').style.display = 'block';
+        }
+    });
+
+    function loginGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithPopup(provider).catch(e => alert(e.message));
+    }
+
+    function loginEmail() {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('pass').value;
+        firebase.auth().signInWithEmailAndPassword(e, p).catch(e => alert(e.message));
+    }
+
+    function signupEmail() {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('pass').value;
+        firebase.auth().createUserWithEmailAndPassword(e, p).then(() => alert("تم التسجيل!")).catch(e => alert(e.message));
+    }
+
+    function verifySecret() {
+        if (document.getElementById('secretKey').value === "19952009") {
+            document.getElementById('secret-section').style.display = 'none';
+            document.getElementById('upload-section').style.display = 'block';
+        } else {
+            alert("كود خاطئ!");
+        }
+    }
+</script>
+
+</body>
+</html>
