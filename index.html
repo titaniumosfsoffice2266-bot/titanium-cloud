@@ -2,14 +2,21 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Titanium Cloud - الصفحة الرئيسية</title>
+    <title>Titanium Cloud - الرئيسية</title>
     <link rel="stylesheet" href="common.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
 <header>
     <h1>Titanium Cloud</h1>
-    <p>مساحتك الآمنة في السحاب</p>
+    <p>مرحباً بك في مستقبل التخزين السحابي</p>
+    
+    <div id="user-status" style="margin-top: 15px;">
+        <button class="btn-main" id="loginBtn" onclick="showLoginModal()">تسجيل الدخول / إنشاء حساب</button>
+        <span id="welcomeMsg" style="display: none; color: #1a73e8; font-weight: bold;"></span>
+    </div>
 </header>
 
 <div class="nav-menu">
@@ -19,17 +26,27 @@
     <a href="#sync">مزامنة الأجهزة</a>
 </div>
 
+<div id="loginModal" style="display:none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+    <div class="plan-card" style="margin: 10% auto; width: 320px; text-align: center;">
+        <h3>Titanium ID</h3>
+        <input type="email" id="email" placeholder="البريد الإلكتروني">
+        <input type="password" id="pass" placeholder="كلمة المرور">
+        <button class="btn-main" onclick="loginEmail()">دخول</button>
+        <button class="btn-main" style="background: white; color: #4285F4; border: 1px solid #dadce0;" onclick="loginGoogle()">الدخول بـ Google</button>
+        <button class="btn-main" style="background: #5f6368;" onclick="closeLoginModal()">إغلاق</button>
+    </div>
+</div>
+
 <div id="storage" class="section">
     <h2>محتوى السحابة</h2>
-    <p style="color: #666;">سجل الدخول لتتمكن من استعراض ملفاتك المخزنة.</p>
-    <button class="btn-main">فتح المكتبة</button>
+    <div id="storage-content">يجب تسجيل الدخول لعرض ملفاتك.</div>
 </div>
 
 <div id="upload" class="section" style="background: #fff;">
     <h2>رفع ملفات</h2>
-    <p>اسحب الملفات هنا أو اضغط للرفع</p>
+    <p>ارفع ملفاتك الآن إلى مساحتك الخاصة</p>
     <input type="file" id="fileInput" style="display: none;">
-    <button class="btn-main" onclick="document.getElementById('fileInput').click()">اختر ملفاً للرفع</button>
+    <button class="btn-main" id="uploadBtn" onclick="handleUploadClick()">اختر ملفاً للرفع</button>
 </div>
 
 <div id="plans" class="section">
@@ -38,33 +55,68 @@
         <div class="plan-card">
             <h3>المجانية</h3>
             <div class="price">20 GB</div>
-            <p>مثالية للاستخدام الشخصي البسيط</p>
-            <button class="btn-main" style="background: #5f6368;">مفعلة حالياً</button>
+            <p>مساحة افتراضية لكل مستخدم</p>
+            <button class="btn-main" style="background: #2e7d32;">مفعلة</button>
         </div>
         <div class="plan-card">
             <h3>الاحترافية</h3>
             <div class="price">200 GB</div>
-            <p>دعم فني وسرعة رفع مضاعفة</p>
-            <button class="btn-main">اشترك الآن</button>
-        </div>
-        <div class="plan-card">
-            <h3>الأعمال</h3>
-            <div class="price">2 TB</div>
-            <p>مساحة غير محدودة لفريقك</p>
-            <button class="btn-main">اشترك الآن</button>
+            <p>9.99$ / شهرياً</p>
+            <button class="btn-main">ترقية الآن</button>
         </div>
     </div>
 </div>
 
 <div id="sync" class="section" style="background: #fff;">
     <h2>مزامنة عبر الأجهزة</h2>
-    <p>تيتانيوم كلاود متاح على Windows, Android, و iOS. ملفاتك معك أينما كنت.</p>
-    <img src="https://via.placeholder.com/400x200?text=Sync+Across+Devices" alt="Sync" style="margin-top: 20px; border-radius: 8px;">
+    <p>بياناتك محدثة دائماً بين هاتفك وحاسوبك.</p>
 </div>
 
-<footer style="text-align: center; padding: 40px; color: #888; font-size: 12px;">
-    &copy; 2026 Titanium Project. جميع الحقوق محفوظة.
-</footer>
+<script>
+    // إعدادات Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyDZxZp8iUyuzMdioBUHh9qjMxe-_C484oU",
+        authDomain: "titanium-project-b6ad3.firebaseapp.com",
+        projectId: "titanium-project-b6ad3",
+        storageBucket: "titanium-project-b6ad3.firebasestorage.app",
+        messagingSenderId: "222679477160",
+        appId: "1:222679477160:web:87cc56d7bd638a8bbb8b9d"
+    };
+    firebase.initializeApp(firebaseConfig);
 
+    // مراقبة المستخدم
+    firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('welcomeMsg').style.display = 'inline';
+            document.getElementById('welcomeMsg').innerText = "أهلاً، " + (user.displayName || user.email);
+            document.getElementById('storage-content').innerText = "لا توجد ملفات حالياً في سحابة 20GB الخاصة بك.";
+            closeLoginModal();
+        }
+    });
+
+    function showLoginModal() { document.getElementById('loginModal').style.display = 'block'; }
+    function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
+
+    function loginGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithPopup(provider).catch(e => alert(e.message));
+    }
+
+    function loginEmail() {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('pass').value;
+        firebase.auth().signInWithEmailAndPassword(e, p).catch(e => alert(e.message));
+    }
+
+    function handleUploadClick() {
+        if (!firebase.auth().currentUser) {
+            alert("يرجى تسجيل الدخول أولاً للرفع.");
+            showLoginModal();
+        } else {
+            document.getElementById('fileInput').click();
+        }
+    }
+</script>
 </body>
 </html>
